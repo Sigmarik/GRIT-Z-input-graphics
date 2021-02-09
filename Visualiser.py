@@ -7,6 +7,10 @@ pygame.init()
 
 def border(string):
     return string[string.find('(') + 1 : string.rfind(')')]
+"""
+Извлекает значение внутри скобок в строке
+string - исходная строка (обязана содержать хотя бы одну открывающую и закрывающую скобку в нужном порядке)
+"""
 
 class UIElement:
     typ = 'None'
@@ -16,7 +20,7 @@ class UIElement:
         self.typ = typ
         self.name = name
         self.options = options.copy()
-    def get_gui(self, rect, manager):
+    def get_gui(self, rect, manager): # Возвращает объект GUI
         if self.typ == 'text':
             answ = pygame_gui.elements.ui_text_entry_line.UITextEntryLine(relative_rect=rect, manager=manager)
             answ.set_text(self.name)
@@ -26,6 +30,9 @@ class UIElement:
                                                                         starting_option=self.name,
                                                                         relative_rect=rect,
                                                                         manager=manager)
+"""
+Класс для временного хранения результатов расшифровки входной строки программы.
+"""
 
 def decode_uis(string):
     answ = []
@@ -38,6 +45,9 @@ def decode_uis(string):
             s = border(com).split()
             answ.append(UIElement('list', s[0], s[1:]))
     return answ
+"""
+Функция для расшифровки входной строки (ввода) программы
+"""
 
 class Drawer:
     def __init__(self, params=''):
@@ -50,12 +60,12 @@ class Drawer:
                                          manager=self.manager)
         self.reset(params)
         self.tm = time.monotonic()
-    def reset(self, params):
+    def reset(self, params): # Пересоздаёт меню с другими настройками (ввод)
         self.UIs = decode_uis(params)
         self.guis = []
         for i, ui in enumerate(self.UIs):
             self.guis.append(ui.get_gui(pygame.Rect((20, 20 + i * 30), (250, 20)), self.manager))
-    def get_values(self):
+    def get_values(self): # Возвращает массив значений элементов интерфейса
         answ = []
         for ui in self.guis:
             try:
@@ -66,7 +76,7 @@ class Drawer:
                 except:
                     print('Visualizer ERROR!\nWrong UI type')
         return answ
-    def operate_events(self):
+    def operate_events(self): # Обрабатывает события пользователя.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return 'stop'
@@ -75,7 +85,7 @@ class Drawer:
                     if event.ui_element == self.generate_button:
                         return ' '.join(self.get_values())
             self.manager.process_events(event)
-    def tick(self):
+    def tick(self): # Функция для обновления. Должна вызываться каждый проход основного цикла программы.
         TM = time.monotonic()
         delta = TM - self.tm
         self.tm = TM
@@ -85,3 +95,6 @@ class Drawer:
         self.manager.draw_ui(self.scr)
         pygame.display.update()
         return res
+"""
+Основной класс программы
+"""
